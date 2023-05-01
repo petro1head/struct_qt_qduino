@@ -251,28 +251,6 @@ void f_ot_tauIn(F_ot_tau *pF, unsigned long t, double in_u) {
   }
 }
 
-
-
-// byte readed = 0;
-// // получаем структуру
-// Data qt_data;
-
-// bool get_data() {
-//   char* bWrite = (char*)&qt_data;
-//   bWrite += readed;
-
-//   while (Serial.available()) {
-//     if (readed >= sizeof(Data)) {
-//       readed = 0;
-//       return true;
-//     }
-
-//     *bWrite++ = Serial.read();
-//     readed++;
-//   }
-//   return false;
-// }
-
 void setup() {
   // Настройка вывода
   // инициирует последовательное соединение
@@ -283,32 +261,6 @@ void setup() {
   // Serial.println(sizeof(qt_data));
 }
 
-// void loop() {
-//   if (Serial.available()) {
-//     if (get_data()) {
-//       Serial.println(qt_data.speed, 5);
-//       Serial.flush();
-//     } else {
-//       Serial.println("B");
-//     }
-//   }
-// }
-
-// void loop() {
-//     if(Serial.available() >= sizeof(Data)) { // ожидание приема всех байтов структуры
-//         Data qt_data;
-//         Serial.readBytes((const char*)(&qt_data.speed), sizeof(qt_data.speed)); // чтение первого поля
-//         Serial.readBytes((const char*)(&qt_data.t), sizeof(qt_data.t)); // чтение второго поля
-
-//         // использование полей структуры
-//         anotherFunctionWithTime(qt_data.t);
-//         anotherFunctionWithSpeed(qt_data.speed);
-//     }
-// }
-// System Система из регулятора и Ф от тау
-
-
-
 void SystemRun(unsigned long t, double speed) {  // Делаем прогон через систему
   // Передаём на вход регулятора значение времени, скорости и угла
   regulatorIn(t, speed);
@@ -317,25 +269,15 @@ void SystemRun(unsigned long t, double speed) {  // Делаем прогон ч
 }
 // Что получаем на выходе из системы
 double SystemOut() {
-  Serial.println(ft.u);
-
-//Serial.write((unsigned char*)&(ft.u), sizeof(ft.u));
-//unsigned char* data = (unsigned char*)&(ft.u);
-//Serial.write(data, sizeof(ft.u));
-  // // Система заканчивается Ф от тау
-  // return ft.u;
+ // Serial.println(ft.u);
+  unsigned char* bytes = (unsigned char*)&ft.u;
+  int len = sizeof(double);
+  for (int i = 0; i < len; i++) // младший бит вперед 
+  // for (int i = len - 1; i >= 0; i--) // старший бит вперед
+   {
+    Serial.write(bytes[i]);
+  }
 }
-// void outPrint() {
-//  // Serial.print(SystemOut());
-//  Serial.write(SystemOut());
-// }
-
-typedef struct MyStructure {
-  unsigned int t = 0;
-  float speed = 0;
-} MyStructure;
-
-
 
 typedef struct Data {
   unsigned long t = 0;
@@ -371,19 +313,3 @@ void loop() {
     }
   }
  
-// void loop() {
-
-// // MyStructure input;
-// // MyStructure output;
-
-//     // if(Serial.available() >= sizeof(MyStructure)) 
-//     // { 
-//     //   // переворот битов в unsigned int
-//     //   output.t = reverseBits(input.t);
-//     //   // переворот байтов в float
-//     //   reverseFloat(&input.speed);
-//     // }
-
-//     //SystemRun( output.t, output.speed);
-//     outPrintln();
-// }

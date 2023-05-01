@@ -182,19 +182,14 @@ void MainWindow::readData()
         // То есть данные будут верными если мы сможем считать строку
         // Если мы можем считать строку
 
-        if (this->m_serial->canReadLine())
-        {
-            // Получаем строку с 1907ВМ014
-            QString data = this->m_serial->readLine();
-            if (data.contains("bad"))
-            {
-                qDebug() << data;
-            }
-                    else
-         {
-            // очищаем строку от пробелов
-            data = data.trimmed();
-            // qDebug() << data << data.toDouble();
+
+        QByteArray data = this->m_serial->readAll();// Чтение данных из порта
+                if (data.size() == sizeof(double))
+               {
+                 // Проверка размера данных
+                 double value = *(double*)data.data();
+                 qDebug() << "Received value: " << value;
+
             // Обновим фазовый портрет
             this->updatePhasePortrait();
             // Выведем данные в текст эдит
@@ -207,7 +202,7 @@ void MainWindow::readData()
             // Теперь новые данные с 1907ВМ014 передадим стенду на вход
             // Тем самым осущетсвляем проход по стенду и обновление его параметров
             // времени, скорости
-            this->m_stand->in(data);
+            this->m_stand->run(value);
             // Обновлённые данные со стенда печатаем обратно в последовательный порт
             this->writeData();
             if (!this->IsInside)
@@ -227,9 +222,58 @@ void MainWindow::readData()
                          QMessageBox::information(this,"Сообщение", "Попали в заданную область\nТест пройден!");
                     }
                 }
-           }
 
-          }
+}
+
+
+//        if (this->m_serial->canReadLine())
+//        {
+//            // Получаем строку с 1907ВМ014
+//            QString data = this->m_serial->readLine();
+//            if (data.contains("bad"))
+//            {
+//                qDebug() << data;
+//            }
+//                    else
+//         {
+//            // очищаем строку от пробелов
+//            data = data.trimmed();
+//            // qDebug() << data << data.toDouble();
+//            // Обновим фазовый портрет
+//            this->updatePhasePortrait();
+//            // Выведем данные в текст эдит
+//            //this->showAllVals();
+//            // Обновим график значений от времени
+//            this->updateTimeGrafic();
+//            // Записываем в файл значения угла и скорости
+//            this->WriteFile();
+
+//            // Теперь новые данные с 1907ВМ014 передадим стенду на вход
+//            // Тем самым осущетсвляем проход по стенду и обновление его параметров
+//            // времени, скорости
+//            this->m_stand->in(data);
+//            // Обновлённые данные со стенда печатаем обратно в последовательный порт
+//            this->writeData();
+//            if (!this->IsInside)
+//                {
+//                    if (abs(this->m_stand->speed.s) <= 0.03 && abs(this->m_stand->angle.s) <=0.125)
+//                    {
+//                         // Ставим прогрес бар на 100
+//                         ui->PBIsInside->setValue(100);
+//                         // Меняем значенеи флага - внутри заданной по ТЗ области
+//                         this->IsInside = true;
+//                         QString time = QString::number(this->m_stand->timer.val * 0.001);
+//                         // Добавляем данные в textEdit_Time
+//                         ui->textEdit_Time->append(time);
+//                         // Выводим в textEdit "Тест пройден!"
+//                         ui->textEdit_PassedTheTest->setText("Тест пройден!");
+//                         // Выводим сообщение о прохождении теста
+//                         QMessageBox::information(this,"Сообщение", "Попали в заданную область\nТест пройден!");
+//                    }
+//                }
+//           }
+
+//          }
         // Если мы не можем считать строку, то ждём, когда в серийном порте появятся
         // новые данные, из-за чего вызовется функция ReadData и мы попадём сюда
     }
